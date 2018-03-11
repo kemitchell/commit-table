@@ -1,5 +1,10 @@
 var assert = require('assert')
 
+var VERTICAL = '│'
+var HORIZONTAL = '─'
+var DOWN_RIGHT = '┌'
+var DOWN_LEFT = '┐'
+
 module.exports = function (options) {
   assert.equal(typeof options, 'object')
 
@@ -40,46 +45,69 @@ module.exports = function (options) {
     .sort(comparator)
     .reverse()
 
-  var columnCounter = -1
-  var columns = {}
-  sorted.forEach(function (commit) {
-    var id = commit.id
-    var parents = commit.parents
-    if (columns.hasOwnProperty(id)) {
-      commit.column = columns[id]
-    } else {
-      columnCounter++
-      commit.column = columnCounter
-      columns[id] = commit.column
-    }
-    if (parents.length !== 0) {
-      columns[parents[0]] = commit.column
-    }
-  })
+  var lastColumn = assignColumns(sorted)
 
   sorted.forEach(function (commit) {
     var column = commit.column
 
-    var tr = document.createElement('tr')
-    table.appendChild(tr)
+    var dataTR = document.createElement('tr')
+    table.appendChild(dataTR)
 
     // Empty <td>s before Data <td>
     repeat(column, function () {
-      tr.appendChild(emptyTD())
+      dataTR.appendChild(emptyTD())
     })
 
     // Data <td>
     var td = document.createElement('td')
-    tr.appendChild(td)
+    dataTR.appendChild(td)
     options.render(td, commit, column)
 
     // Empty <td>s after Data <td>
-    repeat(columnCounter - column, function () {
-      tr.appendChild(emptyTD())
+    repeat(lastColumn - column, function () {
+      dataTR.appendChild(emptyTD())
+    })
+
+    var arrowTR = document.createElement('tr')
+    table.appendChild(arrowTR)
+
+    repeat(column, function () {
+      arrowTR.appendChild(emptyTD())
+    })
+    if (commit.parents.length === 0) {
+      arrowTR.appendChild(emptyTD())
+    } else {
+      var arrowTD = document.createElement('td')
+      arrowTD.className = 'arrow'
+      arrowTD.appendChild(document.createTextNode(VERTICAL))
+      arrowTR.appendChild(arrowTD)
+    }
+    repeat(lastColumn - column, function () {
+      arrowTR.appendChild(emptyTD())
     })
   })
 
   return table
+}
+
+function assignColumns (data) {
+  var lastColumn = -1
+  var columns = new Map()
+  data.forEach(function (commit) {
+    var id = commit.id
+    var parents = commit.parents
+    if (columns.has(id)) {
+      commit.column = columns.get(id)
+    } else {
+      lastColumn++
+      commit.column = lastColumn
+      columns.set(id, commit.column)
+    }
+    if (parents.length !== 0) {
+      columns.set(parents[0], commit.column)
+    }
+  })
+  return lastColumn
 }
 
 function emptyTD () {

@@ -17,8 +17,8 @@ var data = [
     timestamp: new Date() - 500
   },
   {
-    id: 'fourth',
-    parents: [],
+    id: 'merging',
+    parents: ['third', 'second'],
     timestamp: new Date()
   }
 ]
@@ -34,5 +34,7 @@ document.body.appendChild(commitTable({
     element.appendChild(document.createTextNode('column ' + column))
     element.appendChild(document.createElement('br'))
     element.appendChild(document.createTextNode(new Date(commit.timestamp).toISOString()))
+    element.appendChild(document.createElement('br'))
+    element.appendChild(document.createTextNode(commit.parents.join(',')))
   }
 }))
