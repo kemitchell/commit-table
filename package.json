@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "browserify": "^16.1.1",
+    "exorcist": "^1.0.1",
+    "watchify": "^3.11.0"
+  },
+  "scripts": {
+    "build": "browserify test.js > browser.js",
+    "watch": "watchify test.js -o 'exorcist browser.js.map > browser.js' -dv"
+  }
+}
